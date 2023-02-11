@@ -5,8 +5,8 @@ using UnityEngine;
 public class Grid : MonoBehaviour
 {
     [SerializeField]Transform initialPointGrid;
-    [SerializeField] float size = 0.5f;
-    [SerializeField] float padding = 0.2f;
+    float size = 0.68f;
+    float scale = 0.7f;
     int[,] grid;
 
     // Start is called before the first frame update
@@ -36,7 +36,7 @@ public class Grid : MonoBehaviour
         {
             for (int j = 0; j < 7; j++)
             {
-                Gizmos.DrawCube(initialPointGrid.position + new Vector3(i+size*0.5f +padding,-(j+size*0.5f+padding), 0), Vector3.one * size);
+                Gizmos.DrawCube(initialPointGrid.position + new Vector3(i*scale, -j*scale, 0), Vector3.one * size);
             }
         }
     }
