@@ -8,10 +8,10 @@ public class ButtonPlay : MonoBehaviour
 {
     public void LoadLevelOne()
     {
-        PlayerPrefs.SetInt("level", 1);
-        SceneManager.LoadScene("Level1");
-        
         //Reset score
         PlayerPrefs.SetInt("score", 0);
+        
+        PlayerPrefs.SetInt("level", 1);
+        SceneManager.LoadScene("Level1");
     }
 }
