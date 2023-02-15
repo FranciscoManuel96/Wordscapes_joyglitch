@@ -1,74 +1,132 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LettersForDrag : MonoBehaviour
 {
-    [SerializeField] float radius = 0.3f;
     [SerializeField] Transform centerDraggingArea;
-    [SerializeField] string[] levelLetters;
+    [SerializeField] Transform levelWords;
+    [SerializeField] TextMeshProUGUI scoreText;
     [SerializeField] GameObject textBox;
+    [SerializeField] string[] levelLetters;
+    [SerializeField] float radius = 0.25f;
     [SerializeField] float radiusLetter = 0.35f;
+    
     Camera mainCamera;
+    List<LetterDetection> letters = new List<LetterDetection>();
+    WordListReader wordListReader;
 
-    int level = 1;
-    int numbLetters;
+    string currentWord = String.Empty;
+    int numbLetters, score;
+    int wordTemp;
+
+    private void Awake()
+    {
+        if (PlayerPrefs.GetInt("score") > 0 && PlayerPrefs.GetInt("level") == 0)
+        {
+            score = 0;
+        }
+
+        //Initialize word list
+        wordListReader = GetComponent<WordListReader>();
+    }
 
     void Start()
     {
+        //Get score and level value
+        int score = PlayerPrefs.GetInt("score");
+        scoreText.text = score.ToString();
         mainCamera = Camera.main;
+        int level = PlayerPrefs.GetInt("level");
+        
         LettersForLevel(level);
         GenerateLetters();
     }
 
-    //[ContextMenu("generate")]
+    void Update()
+    {
+        //When touch ends
+        if (Input.touchCount == 0 && currentWord != string.Empty)
+        {
+            VerifyWord();
+            CleanCurrWord();
+        }
+    }
+
+    //Generate letters onto the circle panel
     private void GenerateLetters()
     {
         for (int i = 0; i < numbLetters; i++)
         {
-            //print the letters of the level on the dragging area through a circumference depending on the number of letters the level has
+            //Print the letters of the level on the dragging area through a circumference depending on the number of letters the level has
             Vector3 pos = transform.position + new Vector3(Mathf.Cos(i * (2 * Mathf.PI) / numbLetters), Mathf.Sin(i * (2 * Mathf.PI) / numbLetters), -1) * radius;
+
             GameObject createdLetter = Instantiate(textBox, pos, Quaternion.identity, transform);
-            createdLetter.GetComponent<TextMeshProUGUI>().text = levelLetters[i];
+            createdLetter.GetComponentInChildren<TextMeshProUGUI>().text = levelLetters[i];
+            LetterDetection letter = createdLetter.GetComponentInChildren<LetterDetection>();
+            letter.OnTouchEnter+= (t) =>
+            {
+                currentWord += t;
+                
+                Debug.Log(currentWord);
+            };
+            letters.Add(letter);
         }
     }
 
-    void Update()
+    //Verify if the word formed is on the board (+2 points), in the word list (+1 point) or none
+    void VerifyWord()
     {
-        //detetar touch (posiçao inicial e se interceptou algum dos colliders das letras)
-        //if (Input.touchCount > 0)
-        //{
-        //    print("touch");
-        //    Vector2 touchPoint = Input.touches[0].position;
-        //    if (Vector2.Distance(touchPoint, (Vector2)transform.position + Vector2.right) <= radiusLetter)
-        //    {
-        //        Debug.Log("acertou");
-        //    }
-        //}
-        if (Input.GetMouseButton(0))
+        foreach (Transform child in levelWords)
         {
-            
-            Vector2 touchPoint = Input.mousePosition - transform.position;
-            print(transform.position);
-            //print(touchPoint);
-            //print((Vector2)transform.position + Vector2.right);
-            if (Vector2.Distance(touchPoint, (Vector2)transform.position + Vector2.right) <= radiusLetter)
+            if (!child.gameObject.activeSelf && child.name.ToUpper() == currentWord.ToUpper())
             {
-                Debug.Log("acertou");
+                child.gameObject.SetActive(true);
+                wordTemp += 1;
+                score = PlayerPrefs.GetInt("score");
+                PlayerPrefs.SetInt("score", score + 2);
+                scoreText.text = score.ToString();
+                if (wordTemp == levelWords.childCount)
+                {
+                    NextLevel();
+                }
+                return;
             }
         }
-        
+
+        if (wordListReader.words.Contains(currentWord.ToUpper()))
+        {
+            score = PlayerPrefs.GetInt("score");
+            PlayerPrefs.SetInt("score", score + 1);
+            scoreText.text = score.ToString();
+        }
+        else
+        {
+            //Toast Message "Invalid Word"
+        }
     }
 
+    //Clean formed word
+    void CleanCurrWord()
+    {
+        currentWord = string.Empty;
+        foreach (LetterDetection letter in letters)
+        {
+            letter.EnableLetter();
+        }
+    }
 
-    //guardar a letra do respectivo collider onde tocou numa variavel
-    //verificar se a palavra formada esta na grid (+2 pontos) ou se está na wordlist (+1 ponto)
-    //
+    //Change level to next one
+    void NextLevel()
+    {
+        int level = PlayerPrefs.GetInt("level") + 1;
+        PlayerPrefs.SetInt("level", level);
+        SceneManager.LoadScene(level);
+    }
 
-    //Hardcoded letters for the levels
+    //Define words for the level and define number of letters depending on the level variable value
     public void LettersForLevel(int level)
     {
         if (level == 1) 
@@ -89,18 +147,8 @@ public class LettersForDrag : MonoBehaviour
         }
         else if (level == 5) 
         { 
-            levelLetters = new string[] { "R", "A", "D", "T", "I", "A", "E", "N" };
+            levelLetters = new string[] { "R", "A", "D", "T", "I", "A", "E", "N", "T" };
         }
         numbLetters = levelLetters.Length;
-    }
-
-    private void OnDrawGizmos()
-    {
-        for (int i = 0; i < numbLetters; i++)
-        {
-            //print the letters of the level on the dragging area through a circumference depending on the number of letters the level has
-            Vector3 pos = transform.position + new Vector3(Mathf.Cos(i * (2 * Mathf.PI) / numbLetters), Mathf.Sin(i * (2 * Mathf.PI) / numbLetters), -1) * radius;
-            Gizmos.DrawSphere(pos, radiusLetter);
-        }
     }
 }

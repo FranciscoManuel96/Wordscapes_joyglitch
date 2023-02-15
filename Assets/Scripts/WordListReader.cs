@@ -9,15 +9,15 @@ public class WordListReader : MonoBehaviour
     public HashSet<string> words;
     [SerializeField] TextAsset csvFile;
 
-    //usar hashset para guardar a lista de palavras
+    void Start()
+    {
+        ReadCSV();
+    }
+
+    //Use hashset to save the words read from the Word List file
     void ReadCSV()
     {
         string[] tempWords = csvFile.text.Split("\r\n");
         words = new HashSet<string>(tempWords);
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
-        ReadCSV();
     }
 }
