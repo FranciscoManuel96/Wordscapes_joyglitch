@@ -64,8 +64,6 @@ public class LettersForDrag : MonoBehaviour
             letter.OnTouchEnter+= (t) =>
             {
                 currentWord += t;
-                
-                Debug.Log(currentWord);
             };
             letters.Add(letter);
         }
