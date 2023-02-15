@@ -24,11 +24,6 @@ public class LettersForDrag : MonoBehaviour
 
     private void Awake()
     {
-        if (PlayerPrefs.GetInt("score") > 0 && PlayerPrefs.GetInt("level") == 0)
-        {
-            score = 0;
-        }
-
         //Initialize word list
         wordListReader = GetComponent<WordListReader>();
     }

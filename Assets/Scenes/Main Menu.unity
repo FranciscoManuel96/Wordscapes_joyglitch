@@ -429,7 +429,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 564412480}
         m_TargetAssemblyTypeName: ButtonPlay, Assembly-CSharp
-        m_MethodName: LoadNextScene
+        m_MethodName: LoadLevelOne
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

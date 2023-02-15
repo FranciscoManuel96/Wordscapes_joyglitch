@@ -6,9 +6,12 @@ using UnityEngine.SocialPlatforms.Impl;
 
 public class ButtonPlay : MonoBehaviour
 {
-    public void LoadNextScene()
+    public void LoadLevelOne()
     {
-        SceneManager.LoadScene("Level1");
         PlayerPrefs.SetInt("level", 1);
+        SceneManager.LoadScene("Level1");
+        
+        //Reset score
+        PlayerPrefs.SetInt("score", 0);
     }
 }
